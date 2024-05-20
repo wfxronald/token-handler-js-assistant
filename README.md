@@ -1,5 +1,5 @@
 # token-handler-js-assistant
-A helper library to help SPAs interact with OAuth Agent in the Token Handler pattern. 
+A helper library to help SPAs interact with OAuth Agent in the Token Handler pattern.
 
 ## Add to project
 Add to your project using npm
@@ -56,11 +56,3 @@ on every load of the SPA. This function makes a decision based the query string 
        location.href = logoutResponse.logoutUrl;
    }
    ```
-
-## Building
-
-Run `npm install` followed by `npm run build`
-
-## Running unit tests
-
-This repo contains unit tests implemented by `jest`. To execute them, run `npm test`
