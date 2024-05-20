@@ -2,8 +2,8 @@
   "name": "@curity/token-handler-js-assistant",
   "version": "1.0.0",
   "description": "Curity Token Handler JavaScript helper library",
-  "main": "token-handler-assistant-lib.js",
-  "types": "src/index.d.ts",
+  "main": "lib/token-handler-assistant-lib.js",
+  "types": "lib/index.d.ts",
   "scripts": {
     "watch": "webpack --watch",
     "build": "webpack",
