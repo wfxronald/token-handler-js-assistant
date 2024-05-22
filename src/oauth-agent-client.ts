@@ -39,10 +39,10 @@ export interface Configuration {
  * The main class that communicates with Token Handler's OAuth Agent.
  */
 export class OAuthAgentClient {
-  private readonly config: Configuration
+  private readonly oauthAgentBaseUrl: string
 
   public constructor(config: Configuration) {
-    this.config = config;
+    this.oauthAgentBaseUrl = config.oauthAgentBaseUrl.endsWith('/') ? config.oauthAgentBaseUrl : `${config.oauthAgentBaseUrl}/`;
   }
 
   /**
@@ -64,7 +64,10 @@ export class OAuthAgentClient {
    */
   async session(): Promise<SessionResponse> {
     const sessionResponse = await this.fetch("GET", "session");
-    return new SessionResponse(sessionResponse.is_logged_in as boolean, this.toMap(sessionResponse.id_token_claims))
+    return {
+      isLoggedIn: sessionResponse.is_logged_in as boolean,
+      idTokenClaims: sessionResponse.id_token_claims
+    }
   }
 
   /**
@@ -79,10 +82,13 @@ export class OAuthAgentClient {
    *
    * @throws OAuthAgentRemoteError when OAuth Agent responded with an error
    */
-  async startLogin(request: StartLoginRequest): Promise<StartLoginResponse> {
-    const body = this.toUrlEncodedString(request.extraAuthorizationParameters)
-    const startLoginResponse = await this.fetch("POST", "login/start", body)
-    return new StartLoginResponse(startLoginResponse.authorization_url as string)
+  async startLogin(request?: StartLoginRequest): Promise<StartLoginResponse> {
+    // const body = this.toUrlEncodedString(request?.extraAuthorizationParameters)
+    const urlSearchParams = this.toUrlSearchParams(request?.extraAuthorizationParameters)
+    const startLoginResponse = await this.fetch("POST", "login/start", urlSearchParams)
+    return {
+      authorizationUrl: startLoginResponse.authorization_url
+    }
   }
 
   /**
@@ -96,13 +102,12 @@ export class OAuthAgentClient {
    * @throws OAuthAgentRemoteError when OAuth Agent responded with an error
    */
   async endLogin(request: EndLoginRequest): Promise<SessionResponse> {
-    let queryString = request.queryString
-    if (queryString != null && queryString.startsWith('?')) {
-      queryString = queryString.substring(1)
-    }
-    const endLoginResponse = await this.fetch("POST", "login/end", queryString)
+    const endLoginResponse = await this.fetch("POST", "login/end", request.searchParams)
     const isLoggedIn = endLoginResponse.is_logged_in as boolean
-    return new SessionResponse(isLoggedIn, this.toMap(endLoginResponse.id_token_claims))
+    return {
+      isLoggedIn: isLoggedIn,
+      idTokenClaims: endLoginResponse.id_token_claims
+    }
   }
 
   /**
@@ -117,7 +122,7 @@ export class OAuthAgentClient {
   async logout(): Promise<LogoutResponse> {
     const logoutResponse = await this.fetch("POST", "logout")
     const logoutUrl = logoutResponse.logout_url as string
-    return new LogoutResponse(logoutUrl)
+    return { logoutUrl: logoutUrl }
   }
 
   /**
@@ -134,7 +139,7 @@ export class OAuthAgentClient {
   async onPageLoad(pageUrl: string): Promise<SessionResponse> {
     const url = new URL(pageUrl)
     if (this.isOAuthResponse(url)) {
-      return await this.endLogin(new EndLoginRequest(url.search))
+      return await this.endLogin({ searchParams: url.searchParams })
     } else {
       return await this.session()
     }
@@ -150,29 +155,14 @@ export class OAuthAgentClient {
 
   }
 
-  private toUrlEncodedString(data: Map<string, string> | undefined): string {
+  private toUrlSearchParams(data: {[key: string]: string; } | undefined): URLSearchParams {
     if (!data) {
-      return ""
+      return new URLSearchParams()
     }
-
-    const str: Array<string> = [];
-    data.forEach((value, key) => {
-      str.push(`${encodeURIComponent(key)}=${encodeURIComponent(value)}`);
-    })
-    return str.join("&");
+    return new URLSearchParams(data)
   }
 
-  private toMap(data: Object | undefined): Map<string, any> | undefined {
-    if (!data) {
-      return
-    }
-
-    return new Map<string, any>(Object.entries(data))
-  }
-
-  private async fetch(method: string, path: string, content?: string): Promise<any> {
-    const url = this.config.oauthAgentBaseUrl.endsWith('/') ? `${this.config.oauthAgentBaseUrl}${path}` : `${this.config.oauthAgentBaseUrl}/${path}`;
-
+  private async fetch(method: string, path: string, content?: URLSearchParams): Promise<any> {
     const headers= {
       accept: 'application/json'
     } as Record<string, string>
@@ -191,7 +181,7 @@ export class OAuthAgentClient {
     if (content != null) {
       init['body'] = content
     }
-    const response = await window.fetch(url, init);
+    const response = await window.fetch(`${this.oauthAgentBaseUrl}${path}`, init);
     if (response.ok) {
       return await response.json()
     }

@@ -14,52 +14,52 @@
 
 /**
  * Passed to {@link OAuthAgentClient#startLogin} function. The SPA can pass extra authorization parameters
- * (such as `login_hint` or `ui_locales`). These parameters will be used in the authorization request.
+ * (such as `scope`, `login_hint` or `ui_locales`). These parameters will be used in the authorization request.
  * Each parameter has to be explicitly allowed in the configuration of the token handler application
  * in the Curity server.
  *
  */
-export class StartLoginRequest {
-  constructor(readonly extraAuthorizationParameters?: Map<string, string>) {
-  }
+export interface StartLoginRequest {
+  readonly extraAuthorizationParameters?: { [key: string]: string };
 }
 
 /**
- * Returned from {@link OAuthAgentClient#startLogin} function. Contains the `authorizationUrl`.
+ * Returned from {@link OAuthAgentClient#startLogin} function. Contains the `authorizationUrl` that the SPA
+ * is supposed to redirect the user to.
  */
-export class StartLoginResponse {
-  constructor(readonly authorizationUrl: string) {
-  }
+export interface StartLoginResponse {
+  readonly authorizationUrl: string;
 }
 
 /**
  * Passed to {@link OAuthAgentClient#endLogin} function. The SPA is supposed to pass
- * the query string of the current page into this request.
+ * the {@link URLSearchParams} of the current page URL into this request.
  */
-export class EndLoginRequest {
-  constructor(readonly queryString: string) {
-  }
+export interface EndLoginRequest {
+  readonly searchParams: URLSearchParams;
 }
 
 /**
  * Returned from {@link OAuthAgentClient#session}, {@link OAuthAgentClient#endLogin} and
  * {@link OAuthAgentClient#onPageLoad} functions. Contains:
  * - `isLoggedIn` - a boolean flag indicationg whether a user is logged in
- * - `idTokenClaims` - a map of claims from ID token. This will be `null` if the user is
+ * - `idTokenClaims` - an object containing ID token claims. This will be `null` if the user is
  *                     logged out; or the user is logged in but no ID token was issued.
  */
-export class SessionResponse {
-  constructor(readonly isLoggedIn: boolean, readonly idTokenClaims?: Map<string, any>) {
-  }
+export interface SessionResponse {
+  readonly isLoggedIn: boolean;
+  readonly idTokenClaims?: any;
+
 }
 
 /**
  * Returned from {@link OAuthAgentClient#logout} function. Contains the `logoutUrl` (if logout is enabled in
- * the configuration of the token handler application in the Curity server).
+ * the configuration of the token handler application in the Curity server). The SPA is
+ * supposed to redirect the user to the returned logout URL.
  */
-export class LogoutResponse {
-  constructor(readonly logoutUrl?: string) {
-  }
+export interface LogoutResponse {
+  readonly logoutUrl?: string;
+
 }
 
 /**
