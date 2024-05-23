@@ -190,7 +190,7 @@ export class OAuthAgentClient {
       const errorResponse = await response.json()
       throw new OAuthAgentRemoteError(response.status, errorResponse.error_code as string, errorResponse.detailed_error as string)
     } else {
-      throw new OAuthAgentRemoteError(response.status, response.statusText)
+      throw new OAuthAgentRemoteError(response.status, 'server_error', response.statusText)
     }
   }
 }
