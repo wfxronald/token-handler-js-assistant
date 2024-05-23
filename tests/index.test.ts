@@ -54,47 +54,49 @@ describe('test onPageLoad() function', () => {
   test('when url contains state and code, /login/end should be called', async () => {
     const queryString = '?state=foo&code=bar'
     const response = await client.onPageLoad(redirectUri + queryString);
-    expect(response.idTokenClaims?.get('sub')).toBe('login-end');
+    expect(response.idTokenClaims?.sub).toBe('login-end');
   });
 
   test('when url contains state and error, /login/end should be called', async () => {
     const queryString = '?state=foo&error=bar'
     const response = await client.onPageLoad(redirectUri + queryString);
-    expect(response.idTokenClaims?.get('sub')).toBe('login-end');
+    expect(response.idTokenClaims?.sub).toBe('login-end');
   });
 
   test('when url contains just "response" param, /login/end should be called', async () => {
     const queryString = '?response=eyjwt'
     const response = await client.onPageLoad(redirectUri + queryString);
-    expect(response.idTokenClaims?.get('sub')).toBe('login-end');
+    expect(response.idTokenClaims?.sub).toBe('login-end');
   });
 
   test('when url contains just response param and another param, /session should be called', async () => {
     const queryString = '?response=eyjwt&state=foo'
     const response = await client.onPageLoad(redirectUri + queryString);
-    expect(response.idTokenClaims?.get('sub')).toBe('session');
+    expect(response.idTokenClaims?.sub).toBe('session');
   });
 
   test('when url contains only state, /session should be called', async () => {
     const queryString = '?state=foo'
     const response = await client.onPageLoad(redirectUri + queryString);
-    expect(response.idTokenClaims?.get('sub')).toBe('session');
+    expect(response.idTokenClaims?.sub).toBe('session');
   });
 
   test('when url contains only code, /session should be called', async () => {
     const queryString = '?code=foo'
     const response = await client.onPageLoad(redirectUri + queryString);
-    expect(response.idTokenClaims?.get('sub')).toBe('session');
+    expect(response.idTokenClaims?.sub).toBe('session');
   });
 });
 
 
 describe('test startLogin() function', () => {
   test('extra parameters are passed to authorization url', async () => {
-    const response = await client.startLogin(new StartLoginRequest(new Map<string, string> (Object.entries({
-      ui_locales: 'sv',
-      login_hint: 'tomas'
-    }))))
+    const response = await client.startLogin({
+      extraAuthorizationParameters: {
+        ui_locales: 'sv',
+        login_hint: 'tomas'
+      }
+    })
     expect(response.authorizationUrl).toBe(authzUrl + '?ui_locales=sv&login_hint=tomas');
   });
 });
