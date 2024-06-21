@@ -13,7 +13,7 @@
  */
 
 import fetchMock from "jest-fetch-mock"
-import {Configuration, OAuthAgentClient, StartLoginRequest} from '../src';
+import {Configuration, OAuthAgentClient} from '../src';
 
 const serverUrl = 'https://example.com'
 const authzUrl = serverUrl + '/authz'
@@ -32,7 +32,8 @@ beforeEach(() => {
         is_logged_in: true,
         id_token_claims: {
           sub: 'login-end' // we are using 'sub' claims to distinguish between call to /login/end and /session (otherwise they return the same JSON structure)
-        }
+        },
+        access_token_expires_in: 300
       })
       return Promise.resolve(body)
     } else if (req.url.endsWith("/session")) {
@@ -40,7 +41,8 @@ beforeEach(() => {
         is_logged_in: true,
         id_token_claims: {
           sub: 'session'
-        }
+        },
+        access_token_expires_in: 300
       })
       return Promise.resolve(body)
     }

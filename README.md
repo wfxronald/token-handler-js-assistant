@@ -37,7 +37,7 @@ The `Configuration` object contains the following options:
    const url = new URL(location.href)
    const response = await client.endLogin({ searchParams: url.searchParams })
    if (response.isLoggedIn) {
-    // use id token claims to get username, e.g. response.idTokenClaims?.sub
+     // use id token claims to get username, e.g. response.idTokenClaims?.sub
    }
    ``` 
 Note: The `endLogin` function should only be called with authorization response parameters (when the authorization
@@ -64,7 +64,7 @@ on every load of the SPA. This function makes a decision based the query string 
    const sessionResponse = await client.session()
    // use session data
    if (session.isLoggedIn === true) {
-    session.idTokenClaims?.sub
+     session.idTokenClaims?.sub
    }
    ```
 6. Logging out
@@ -75,3 +75,20 @@ on every load of the SPA. This function makes a decision based the query string 
      location.href = logoutResponse.logoutUrl;
    }
    ```
+   
+7. Implementing preemptive refresh. `session()`, `refresh()`, `endLogin()` and `onPageLoad()` functions return `accessTokenExpiresIn`
+   if the Authorization Server includes `expires_in` in token responses. This field contains number of seconds until an  
+   access token that is in the proxy cookie expires. This value can be used to preemptively refresh the access token.
+   After calling `onPageLoad()` and `refresh()`:
+   ```typescript
+   // const response = await client.onPageLoad(location.href)
+   // const response = await client.refresh()
+   if (response.accessTokenExpiresIn != null) {
+     const delay = Math.max(response.accessTokenExpiresIn - 2, 1)
+     setTimeout(
+       () => { client.refresh(); },
+       delay * 1000
+     );
+   }
+   ```
+   Note: This is just a simplified example. The timeout has to be cleared properly (before every refresh, or before logout).

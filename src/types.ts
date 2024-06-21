@@ -45,11 +45,23 @@ export interface EndLoginRequest {
  * - `isLoggedIn` - a boolean flag indicationg whether a user is logged in
  * - `idTokenClaims` - an object containing ID token claims. This will be `null` if the user is
  *                     logged out; or the user is logged in but no ID token was issued.
+ * - `accessTokenExpiresIn` - expiration time of access token in seconds (`null` if no `expires_in` parameter
+ *                            was returned from the Authorization Server's token endpoint)
  */
 export interface SessionResponse {
   readonly isLoggedIn: boolean;
   readonly idTokenClaims?: any;
+  readonly accessTokenExpiresIn?: number;
+}
 
+
+/**
+ * Returned from the {@link OAuthAgentClient#refresh} function. Contains:
+ * - `accessTokenExpiresIn` - expiration time of access token in seconds (`null` if no `expires_in` parameter
+ *                            was returned from the Authorization Server's token endpoint)
+ */
+export interface RefreshResponse {
+  readonly accessTokenExpiresIn?: number;
 }
 
 /**
@@ -59,7 +71,6 @@ export interface SessionResponse {
  */
 export interface LogoutResponse {
   readonly logoutUrl?: string;
-
 }
 
 /**
