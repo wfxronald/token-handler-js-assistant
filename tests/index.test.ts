@@ -57,6 +57,8 @@ describe('test onPageLoad() function', () => {
     const queryString = '?state=foo&code=bar'
     const response = await client.onPageLoad(redirectUri + queryString);
     expect(response.idTokenClaims?.sub).toBe('login-end');
+    expect(response.isLoggedIn).toBe(true);
+    expect(response.accessTokenExpiresIn).toBe(300);
   });
 
   test('when url contains state and error, /login/end should be called', async () => {
@@ -75,6 +77,8 @@ describe('test onPageLoad() function', () => {
     const queryString = '?response=eyjwt&state=foo'
     const response = await client.onPageLoad(redirectUri + queryString);
     expect(response.idTokenClaims?.sub).toBe('session');
+    expect(response.isLoggedIn).toBe(true);
+    expect(response.accessTokenExpiresIn).toBe(300);
   });
 
   test('when url contains only state, /session should be called', async () => {
