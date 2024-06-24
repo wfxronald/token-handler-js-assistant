@@ -16,6 +16,7 @@ import {
   EndLoginRequest,
   LogoutResponse,
   OAuthAgentRemoteError,
+  RefreshResponse,
   SessionResponse,
   StartLoginRequest,
   StartLoginResponse
@@ -48,10 +49,16 @@ export class OAuthAgentClient {
   /**
    * Refreshes the access token. Calls the `/refresh` endpoint.
    *
+   * @return the refresh token response possibly containing the new access token's expiration time
+   *
    * @throws OAuthAgentRemoteError when OAuth Agent responded with an error
    */
-  async refresh(): Promise<void> {
-    return await this.fetch("POST", "refresh")
+  async refresh(): Promise<RefreshResponse> {
+    const refreshResponse = await this.fetch("POST", "refresh")
+
+    return {
+      accessTokenExpiresIn: refreshResponse.access_token_expires_in
+    }
   }
 
   /**
@@ -66,7 +73,8 @@ export class OAuthAgentClient {
     const sessionResponse = await this.fetch("GET", "session");
     return {
       isLoggedIn: sessionResponse.is_logged_in as boolean,
-      idTokenClaims: sessionResponse.id_token_claims
+      idTokenClaims: sessionResponse.id_token_claims,
+      accessTokenExpiresIn: sessionResponse.access_token_expires_in
     }
   }
 
@@ -83,7 +91,6 @@ export class OAuthAgentClient {
    * @throws OAuthAgentRemoteError when OAuth Agent responded with an error
    */
   async startLogin(request?: StartLoginRequest): Promise<StartLoginResponse> {
-    // const body = this.toUrlEncodedString(request?.extraAuthorizationParameters)
     const urlSearchParams = this.toUrlSearchParams(request?.extraAuthorizationParameters)
     const startLoginResponse = await this.fetch("POST", "login/start", urlSearchParams)
     return {
@@ -103,10 +110,10 @@ export class OAuthAgentClient {
    */
   async endLogin(request: EndLoginRequest): Promise<SessionResponse> {
     const endLoginResponse = await this.fetch("POST", "login/end", request.searchParams)
-    const isLoggedIn = endLoginResponse.is_logged_in as boolean
     return {
-      isLoggedIn: isLoggedIn,
-      idTokenClaims: endLoginResponse.id_token_claims
+      isLoggedIn: endLoginResponse.is_logged_in as boolean,
+      idTokenClaims: endLoginResponse.id_token_claims,
+      accessTokenExpiresIn: endLoginResponse.access_token_expires_in
     }
   }
 

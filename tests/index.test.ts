@@ -13,7 +13,7 @@
  */
 
 import fetchMock from "jest-fetch-mock"
-import {Configuration, OAuthAgentClient, StartLoginRequest} from '../src';
+import {Configuration, OAuthAgentClient} from '../src';
 
 const serverUrl = 'https://example.com'
 const authzUrl = serverUrl + '/authz'
@@ -32,7 +32,8 @@ beforeEach(() => {
         is_logged_in: true,
         id_token_claims: {
           sub: 'login-end' // we are using 'sub' claims to distinguish between call to /login/end and /session (otherwise they return the same JSON structure)
-        }
+        },
+        access_token_expires_in: 300
       })
       return Promise.resolve(body)
     } else if (req.url.endsWith("/session")) {
@@ -40,7 +41,8 @@ beforeEach(() => {
         is_logged_in: true,
         id_token_claims: {
           sub: 'session'
-        }
+        },
+        access_token_expires_in: 300
       })
       return Promise.resolve(body)
     }
@@ -55,6 +57,8 @@ describe('test onPageLoad() function', () => {
     const queryString = '?state=foo&code=bar'
     const response = await client.onPageLoad(redirectUri + queryString);
     expect(response.idTokenClaims?.sub).toBe('login-end');
+    expect(response.isLoggedIn).toBe(true);
+    expect(response.accessTokenExpiresIn).toBe(300);
   });
 
   test('when url contains state and error, /login/end should be called', async () => {
@@ -73,6 +77,8 @@ describe('test onPageLoad() function', () => {
     const queryString = '?response=eyjwt&state=foo'
     const response = await client.onPageLoad(redirectUri + queryString);
     expect(response.idTokenClaims?.sub).toBe('session');
+    expect(response.isLoggedIn).toBe(true);
+    expect(response.accessTokenExpiresIn).toBe(300);
   });
 
   test('when url contains only state, /session should be called', async () => {
