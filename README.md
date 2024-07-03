@@ -92,3 +92,11 @@ on every load of the SPA. This function makes a decision based the query string 
    }
    ```
    Note: This is just a simplified example. The timeout has to be cleared properly (before every refresh, or before logout).
+
+## Cookie Security
+
+- `SameSite=Strict` cookies are sent to APIs, which cannot be sent from malicious sites
+- to ensure that only precise whitelisted origins can send cookies to APIs, a `token-handler-version: 1` header is
+  sent by this library on every request to the OAuth Agent. In cross-origin deployments this ensures that a CORS pre-flight
+  request authorizes access. SPA developers may be required to send this header to token handler proxies as well (refer 
+  to the token handler proxy documentation for details). 
