@@ -171,7 +171,8 @@ export class OAuthAgentClient {
 
   private async fetch(method: string, path: string, content?: URLSearchParams): Promise<any> {
     const headers= {
-      accept: 'application/json'
+      accept: 'application/json',
+      'token-handler-version': '1'
     } as Record<string, string>
 
     if (path == 'login/start' || path == 'login/end') {
