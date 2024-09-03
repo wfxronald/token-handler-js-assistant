@@ -92,7 +92,7 @@ export class OAuthAgentClient {
    */
   async startLogin(request?: StartLoginRequest): Promise<StartLoginResponse> {
     const urlSearchParams = this.toUrlSearchParams(request?.extraAuthorizationParameters)
-    const startLoginResponse = await this.fetch("POST", "login/start", urlSearchParams)
+    const startLoginResponse = await this.fetch("POST", "login/start", undefined, urlSearchParams)
     return {
       authorizationUrl: startLoginResponse.authorization_url
     }
@@ -109,7 +109,7 @@ export class OAuthAgentClient {
    * @throws OAuthAgentRemoteError when OAuth Agent responded with an error
    */
   async endLogin(request: EndLoginRequest): Promise<SessionResponse> {
-    const endLoginResponse = await this.fetch("POST", "login/end", request.searchParams)
+    const endLoginResponse = await this.fetch("POST", "login/end", undefined, request.searchParams)
     return {
       isLoggedIn: endLoginResponse.isLoggedIn as boolean,
       csrfToken: endLoginResponse.csrf,
@@ -127,8 +127,8 @@ export class OAuthAgentClient {
    *
    * @throws OAuthAgentRemoteError when OAuth Agent responded with an error
    */
-  async logout(): Promise<LogoutResponse> {
-    const logoutResponse = await this.fetch("POST", "logout")
+  async logout(csrfKeyValue: string): Promise<LogoutResponse> {
+    const logoutResponse = await this.fetch("POST", "logout", csrfKeyValue)
     const logoutUrl = logoutResponse.logout_url as string
     return { logoutUrl: logoutUrl }
   }
@@ -170,7 +170,7 @@ export class OAuthAgentClient {
     return new URLSearchParams(data)
   }
 
-  private async fetch(method: string, path: string, content?: URLSearchParams): Promise<any> {
+  private async fetch(method: string, path: string, csrfKeyValue?: string, content?: URLSearchParams): Promise<any> {
     const headers= {
       accept: 'application/json',
       'token-handler-version': '1'
@@ -178,6 +178,10 @@ export class OAuthAgentClient {
 
     if (path == 'login/start' || path == 'login/end') {
       headers["content-type"] = 'application/x-www-form-urlencoded'
+    }
+    if (csrfKeyValue) {
+      const csrfStrArr = csrfKeyValue.split("=");
+      headers[csrfStrArr[0]] = csrfStrArr[1];
     }
 
     const init = {
