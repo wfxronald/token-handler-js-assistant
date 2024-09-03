@@ -111,7 +111,8 @@ export class OAuthAgentClient {
   async endLogin(request: EndLoginRequest): Promise<SessionResponse> {
     const endLoginResponse = await this.fetch("POST", "login/end", request.searchParams)
     return {
-      isLoggedIn: endLoginResponse.is_logged_in as boolean,
+      isLoggedIn: endLoginResponse.isLoggedIn as boolean,
+      csrfToken: endLoginResponse.csrf,
       idTokenClaims: endLoginResponse.id_token_claims,
       accessTokenExpiresIn: endLoginResponse.access_token_expires_in
     }

@@ -50,6 +50,7 @@ export interface EndLoginRequest {
  */
 export interface SessionResponse {
   readonly isLoggedIn: boolean;
+  readonly csrfToken: string;
   readonly idTokenClaims?: any;
   readonly accessTokenExpiresIn?: number;
 }
