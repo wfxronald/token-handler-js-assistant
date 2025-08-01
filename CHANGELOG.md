@@ -1,6 +1,6 @@
 # Token Handler Assistant Changelog
 
-## [1.2.2-rc.1] - 2025-07-22
+## [1.2.2] - 2025-08-01
 
 - Update dependencies to latest versions
 
