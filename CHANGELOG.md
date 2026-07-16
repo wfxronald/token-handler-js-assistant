@@ -1,5 +1,14 @@
 # Token Handler Assistant Changelog
 
+## [1.2.2] - 2025-08-01
+
+- Update dependencies to latest versions
+
+## [1.2.1] - 2025-05-06
+ 
+- Add support for extra parameters in refresh requests
+- Unpublish 1.2.0 version since it was broken
+
 ## [1.1.0] - 2024-08-12
 
 - Send `token-handler-version` header in all requests
